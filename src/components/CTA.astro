@@ -1,0 +1,46 @@
+---
+// src/components/CTA.astro
+---
+<section class="relative py-24 px-4 overflow-hidden bg-white">
+    
+    <div class="absolute inset-0 bg-[#0B1221] mt-20"></div>
+    <div class="absolute inset-0 bg-gradient-to-b from-white via-white to-[#0B1221]"></div>
+    
+    <div class="relative z-10 max-w-6xl mx-auto">
+        
+        <div class="absolute -inset-1 bg-gradient-to-r from-siitec-light to-siitec-accent rounded-[2.5rem] blur opacity-30"></div>
+        
+        <div class="relative bg-[#0F172A] border border-siitec-light/20 rounded-[2rem] p-8 md:p-16 overflow-hidden shadow-2xl flex flex-col md:flex-row items-center justify-between gap-10">
+            
+            <div class="absolute top-0 right-0 w-96 h-96 bg-siitec-light/10 rounded-full blur-[80px] -mr-20 -mt-20 pointer-events-none"></div>
+            <div class="absolute bottom-0 left-0 w-full h-full bg-[url('/grid.svg')] opacity-5 pointer-events-none"></div>
+
+            <div class="text-center md:text-left md:w-2/3 relative z-10">
+                <div class="inline-flex items-center gap-2 mb-4">
+                    <span class="w-2 h-2 rounded-full bg-siitec-accent animate-pulse"></span>
+                    <span class="text-siitec-accent font-bold tracking-widest text-xs uppercase">Consultoría Estratégica</span>
+                </div>
+                
+                <h2 class="text-3xl md:text-5xl font-bold text-white mb-6 leading-tight">
+                    Asesoría Especializada <br/>
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-siitec-light to-white">a la Medida de tus Necesidades</span>
+                </h2>
+                
+                <p class="text-gray-400 text-lg font-light leading-relaxed max-w-xl">
+                    No solo vendemos tecnología, diseñamos la solución exacta para ti. Analizamos tu infraestructura y optimizamos tus recursos con las mejores marcas del mercado.
+                </p>
+            </div>
+            
+            <div class="flex-shrink-0 relative z-10">
+                <a href="https://wa.me/523300000000" target="_blank" class="group relative px-8 py-5 bg-siitec-accent text-siitec-dark font-bold text-lg rounded-xl overflow-hidden shadow-[0_0_40px_rgba(249,178,51,0.4)] transition-all duration-300 hover:scale-105 inline-flex items-center gap-4 hover:bg-white hover:text-siitec-accent">
+                    
+                    <span class="relative z-10">Iniciar Conversación</span>
+                    
+                    <svg class="w-6 h-6 relative z-10" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                    
+                    <div class="absolute top-0 -left-full w-[150%] h-full bg-gradient-to-r from-transparent via-white/50 to-transparent skew-x-12 group-hover:animate-[shine_1s_ease-in-out_infinite]"></div>
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
