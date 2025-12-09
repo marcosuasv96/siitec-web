@@ -1,0 +1,179 @@
+---
+import Layout from '../layouts/Layout.astro';
+import CTA from '../components/CTA.astro';
+
+// INFRAESTRUCTURA
+const infraServices = [
+  {
+    title: "Cableado Estructurado",
+    desc: "La autopista de tus datos. Diseño certificado de redes Voz y Datos.",
+    features: ["Categoría 6 / 6A / Fibra", "Organización de Racks (Peinado)", "Certificación con Escáner"],
+    icon: "M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"
+  },
+  {
+    title: "Soluciones Wi-Fi",
+    desc: "Conectividad total. Redes Mesh y enlaces para naves industriales.",
+    features: ["Wi-Fi 6 Empresarial", "Enlaces Punto a Punto (Km)", "Portal Cautivo para visitas"],
+    icon: "M8.111 16.404a5.5 5.5 0 017.778 0M12 20h.01m-7.08-7.071c3.904-3.905 10.236-3.905 14.141 0M1.394 9.393c5.857-5.857 15.355-5.857 21.213 0"
+  },
+  {
+    title: "Videovigilancia (CCTV)",
+    desc: "Seguridad inteligente con visión nocturna y monitoreo remoto.",
+    features: ["Cámaras IP 4K / PTZ", "Detección de Rostros/Placas", "App Móvil 24/7"],
+    icon: "M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"
+  }
+];
+
+// SOFTWARE
+const software = [
+  {
+    title: "Desarrollo Web",
+    desc: "Sitios web rápidos, seguros y optimizados para vender. Tu sucursal digital abierta 24/7.",
+    tags: ["Landing Pages", "E-commerce", "SEO"],
+    icon: "M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
+  },
+  {
+    title: "Programación a Medida",
+    desc: "Sistemas personalizados para automatizar inventarios, ventas o procesos únicos de tu empresa.",
+    tags: ["CRM", "ERP", "Apps Internas"],
+    icon: "M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"
+  }
+];
+
+// PROCESO
+const process = [
+  { step: "01", label: "Diagnóstico", icon: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" },
+  { step: "02", label: "Diseño", icon: "M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" },
+  { step: "03", label: "Ejecución", icon: "M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z M21 12a9 9 0 11-18 0 9 9 0 0118 0z" },
+  { step: "04", label: "Soporte", icon: "M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0z" }
+];
+---
+
+<Layout title="Servicios | Siitec Smart">
+    
+    <section class="relative pt-32 pb-20 bg-gray-50 dark:bg-[#0B1221] transition-colors duration-300 overflow-hidden">
+        <div class="absolute inset-0 bg-[url('/grid.svg')] opacity-5 dark:opacity-10 pointer-events-none"></div>
+        <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-siitec-light/10 blur-[120px] rounded-full pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto px-4 relative z-10 text-center">
+            <h1 class="text-4xl md:text-6xl font-bold text-gray-900 dark:text-white mb-6">
+                Catálogo de <span class="text-transparent bg-clip-text bg-gradient-to-r from-siitec-dark to-siitec-light dark:from-siitec-light dark:to-siitec-accent">Soluciones</span>
+            </h1>
+            <p class="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto font-light leading-relaxed">
+                Dominamos ambas capas de la tecnología: la <strong>infraestructura física</strong> que conecta tus equipos y el <strong>software</strong> que impulsa tu negocio.
+            </p>
+        </div>
+    </section>
+
+    <section class="py-20 bg-white dark:bg-[#0F172A] transition-colors duration-300 border-t border-gray-200 dark:border-white/5">
+        <div class="max-w-7xl mx-auto px-4">
+            
+            <div class="flex items-center gap-4 mb-12">
+                <div class="w-12 h-12 rounded-xl bg-siitec-dark text-white flex items-center justify-center shadow-lg">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                </div>
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Infraestructura Física</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Conectividad y Seguridad</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {infraServices.map(servicio => (
+                    <div class="group relative bg-gray-50 dark:bg-[#1E293B] rounded-2xl p-8 border border-gray-200 dark:border-white/5 hover:border-siitec-light/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:hover:shadow-siitec-light/5 flex flex-col h-full">
+                        
+                        <div class="w-14 h-14 bg-white dark:bg-white/5 rounded-full flex items-center justify-center text-siitec-dark dark:text-siitec-light mb-6 shadow-sm border border-gray-100 dark:border-white/10 group-hover:scale-110 transition-transform">
+                            <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d={servicio.icon}></path>
+                            </svg>
+                        </div>
+
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-3">{servicio.title}</h3>
+                        <p class="text-gray-600 dark:text-gray-400 text-sm leading-relaxed mb-6 flex-grow">
+                            {servicio.desc}
+                        </p>
+
+                        <ul class="space-y-3 border-t border-gray-200 dark:border-white/10 pt-5 mt-auto">
+                            {servicio.features.map(feature => (
+                                <li class="flex items-start gap-2 text-xs text-gray-500 dark:text-gray-400">
+                                    <svg class="w-4 h-4 text-siitec-accent shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                    {feature}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                ))}
+            </div>
+
+        </div>
+    </section>
+
+    <section class="py-20 bg-gray-50 dark:bg-[#0B1221] transition-colors duration-300 relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 relative z-10">
+            
+            <div class="flex items-center justify-end gap-4 mb-12 text-right">
+                <div>
+                    <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Desarrollo Digital</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">Software & Web</p>
+                </div>
+                <div class="w-12 h-12 rounded-xl bg-white dark:bg-white/10 flex items-center justify-center text-siitec-dark dark:text-white shadow-lg border border-gray-200 dark:border-white/10">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {software.map(soft => (
+                    <div class="relative overflow-hidden bg-white dark:bg-[#151f32] rounded-3xl p-8 md:p-10 border border-gray-200 dark:border-white/5 shadow-lg group hover:border-siitec-light/30 transition-all hover:shadow-2xl dark:hover:shadow-purple-900/20">
+                        
+                        <div class="absolute -right-20 -top-20 w-60 h-60 bg-gradient-to-br from-siitec-light/10 to-purple-500/10 rounded-full blur-3xl group-hover:opacity-100 opacity-50 transition-opacity duration-500"></div>
+                        
+                        <div class="relative z-10 flex flex-col md:flex-row gap-6 items-start">
+                            <div class="p-4 bg-gray-50 dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/10 shrink-0 text-siitec-dark dark:text-white group-hover:text-purple-500 transition-colors">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d={soft.icon}></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-3">{soft.title}</h3>
+                                <p class="text-gray-600 dark:text-gray-400 leading-relaxed mb-6">
+                                    {soft.desc}
+                                </p>
+                                
+                                <div class="flex flex-wrap gap-2">
+                                    {soft.tags.map(tag => (
+                                        <span class="px-3 py-1 rounded-full bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-300 text-xs font-medium border border-gray-200 dark:border-white/10">
+                                            {tag}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+        </div>
+    </section>
+
+    <section class="py-20 bg-white dark:bg-[#0F172A] border-t border-gray-200 dark:border-white/5 transition-colors duration-300">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-16">Proceso de Implementación</h2>
+            
+            <div class="relative flex flex-col md:flex-row justify-between items-center gap-8 md:gap-0">
+                <div class="hidden md:block absolute top-1/2 left-0 w-full h-0.5 bg-gray-200 dark:bg-white/10 -z-0"></div>
+
+                {process.map((phase, i) => (
+                    <div class="relative z-10 bg-white dark:bg-[#0F172A] p-4">
+                        <div class="w-16 h-16 mx-auto bg-gray-100 dark:bg-[#1E293B] rounded-full flex items-center justify-center border-2 border-gray-200 dark:border-siitec-light/30 shadow-lg mb-3 group hover:scale-110 transition-transform cursor-default">
+                            <svg class="w-6 h-6 text-gray-500 dark:text-siitec-light group-hover:text-siitec-accent transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d={phase.icon}></path></svg>
+                        </div>
+                        <span class="block text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">{phase.label}</span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    </section>
+
+    <CTA />
+
+</Layout>

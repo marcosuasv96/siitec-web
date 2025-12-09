@@ -4,7 +4,7 @@ import Navbar from "../components/Navbar.astro";
 import Footer from "../components/Footer.astro";
 
 interface Props {
-	title: string;
+    title: string;
 }
 
 const { title } = Astro.props;
@@ -12,45 +12,40 @@ const { title } = Astro.props;
 
 <!doctype html>
 <html lang="es" class="scroll-smooth">
-	<head>
-		<meta charset="UTF-8" />
-		<meta
-			name="description"
-			content="Siitec Smart - Tecnología en Zapopan"
-		/>
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<title>{title}</title>
-		<link
-			href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap"
-			rel="stylesheet"
-		/>
-		<style is:global>
-			/* Estilo de la barra de desplazamiento estilo Hacker/Tech */
-			::-webkit-scrollbar {
-				width: 10px;
-			}
-			::-webkit-scrollbar-track {
-				background: #1b315e;
-			}
-			::-webkit-scrollbar-thumb {
-				background: #5ca4d8;
-				border-radius: 5px;
-			}
-			::-webkit-scrollbar-thumb:hover {
-				background: #f9b233;
-			}
-		</style>
-	</head>
-	<body
-		class="font-sans bg-gray-50 text-slate-800 flex flex-col min-h-screen"
-	>
-		<Navbar />
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="description" content="Siitec Smart - Soluciones tecnológicas en Zapopan" />
+        <meta name="viewport" content="width=device-width" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <title>{title}</title>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+        
+        <script is:inline>
+            // Lógica inmediata para evitar el "parpadeo" blanco/oscuro al cargar
+            if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        </script>
 
-		<main class="flex-grow">
-			<slot />
-		</main>
+        <style is:global>
+            /* Scrollbar estilo Tech */
+            ::-webkit-scrollbar { width: 10px; }
+            ::-webkit-scrollbar-track { background: #1b315e; }
+            ::-webkit-scrollbar-thumb { background: #5ca4d8; border-radius: 5px; }
+            ::-webkit-scrollbar-thumb:hover { background: #f9b233; }
+        </style>
+    </head>
+    
+    <body class="font-sans bg-gray-50 dark:bg-[#0B1221] text-gray-900 dark:text-white transition-colors duration-300 flex flex-col min-h-screen">
+        
+        <Navbar />
 
-		<Footer />
-	</body>
+        <main class="flex-grow">
+            <slot />
+        </main>
+
+        <Footer />
+    </body>
 </html>
