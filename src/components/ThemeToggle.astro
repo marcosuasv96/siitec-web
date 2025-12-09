@@ -1,4 +1,4 @@
-<button type="button" class="theme-toggle-btn group relative inline-flex items-center justify-center p-2 rounded-full transition-all duration-300 focus:outline-none ring-1 ring-transparent focus:ring-siitec-light bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-white/10 dark:text-gray-400 dark:hover:bg-white/20 dark:hover:text-white">
+<button type="button" class="theme-toggle-btn group relative inline-flex items-center justify-center p-2 rounded-full transition-all duration-300 focus:outline-none ring-1 ring-transparent focus:ring-siitec-light bg-gray-100 text-gray-500 hover:bg-gray-200 dark:bg-white/10 dark:text-gray-400 dark:hover:bg-white/20 dark:hover:text-white z-50">
     
     <svg class="sun-icon hidden w-5 h-5 transition-transform duration-500 group-hover:rotate-90" fill="currentColor" viewBox="0 0 20 20">
         <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z" fill-rule="evenodd" clip-rule="evenodd"></path>
@@ -12,84 +12,78 @@
 </button>
 
 <script is:inline>
-    // Función autoejecutable para aislar el código
     (function() {
-        // --- GUARDIA DE SEGURIDAD ---
-        // Si este script ya corrió una vez, detenemos la segunda ejecución.
-        if (window.themeToggleInitialized) return;
-        window.themeToggleInitialized = true;
-
-        // Función para actualizar TODOS los botones a la vez (Escritorio y Móvil)
-        function updateThemeUI(isDark) {
-            const buttons = document.querySelectorAll('.theme-toggle-btn');
-            
-            buttons.forEach(btn => {
-                const sunIcon = btn.querySelector('.sun-icon');
-                const moonIcon = btn.querySelector('.moon-icon');
-
-                if (isDark) {
-                    // Si es oscuro, mostrar sol, ocultar luna
-                    sunIcon.classList.remove('hidden');
-                    moonIcon.classList.add('hidden');
-                } else {
-                    // Si es claro, ocultar sol, mostrar luna
-                    sunIcon.classList.add('hidden');
-                    moonIcon.classList.remove('hidden');
-                }
-            });
-        }
-
-        // Lógica principal al hacer clic
-        function handleToggleClick(e) {
-            e.preventDefault(); // Prevenir comportamientos extraños
-            
-            // Verificar estado actual
+        // Lógica central para cambiar el tema
+        const toggleTheme = () => {
             const isDark = document.documentElement.classList.contains('dark');
             
-            // Invertir estado
             if (isDark) {
                 document.documentElement.classList.remove('dark');
                 localStorage.setItem('color-theme', 'light');
-                updateThemeUI(false);
             } else {
                 document.documentElement.classList.add('dark');
                 localStorage.setItem('color-theme', 'dark');
-                updateThemeUI(true);
             }
-        }
+            // Actualizamos TODOS los iconos en la pantalla
+            updateIcons();
+        };
 
-        // Inicialización: Buscar botones y asignar eventos
-        function initTheme() {
+        // Función para pintar los iconos correctos (Sol o Luna)
+        const updateIcons = () => {
+            const isDark = document.documentElement.classList.contains('dark');
             const buttons = document.querySelectorAll('.theme-toggle-btn');
             
             buttons.forEach(btn => {
-                // Limpiamos listeners viejos por si acaso
-                btn.removeEventListener('click', handleToggleClick); 
-                // Asignamos el nuevo
-                btn.addEventListener('click', handleToggleClick);
+                const sun = btn.querySelector('.sun-icon');
+                const moon = btn.querySelector('.moon-icon');
+                
+                if (isDark) {
+                    sun.classList.remove('hidden');
+                    moon.classList.add('hidden');
+                } else {
+                    sun.classList.add('hidden');
+                    moon.classList.remove('hidden');
+                }
             });
+        };
 
-            // Sincronizar estado inicial al cargar la página
+        // Función Maestra de Inicialización
+        const initThemeSystem = () => {
+            // 1. Sincronizar estado inicial (Leer memoria o sistema)
             const themeStored = localStorage.getItem('color-theme');
             const sysDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
             
-            const isDarkInitial = themeStored === 'dark' || (!themeStored && sysDark);
-            
-            if (isDarkInitial) {
+            if (themeStored === 'dark' || (!themeStored && sysDark)) {
                 document.documentElement.classList.add('dark');
             } else {
                 document.documentElement.classList.remove('dark');
             }
-            
-            updateThemeUI(isDarkInitial);
-        }
+            updateIcons();
 
-        // Ejecutar inicialización
-        initTheme();
+            // 2. Asignar eventos a los botones (¡Aquí estaba el problema!)
+            const buttons = document.querySelectorAll('.theme-toggle-btn');
+            buttons.forEach(btn => {
+                // Verificamos si este botón YA tiene el evento para no duplicarlo
+                if (btn.dataset.init === "true") return;
 
-        // Soporte para View Transitions de Astro (Navegación suave)
-        document.addEventListener('astro:after-swap', () => {
-            initTheme();
-        });
+                // Si es nuevo, le agregamos el click
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault(); // Evita comportamientos raros en móvil
+                    toggleTheme();
+                });
+                
+                // Lo marcamos como "listo"
+                btn.dataset.init = "true";
+            });
+        };
+
+        // Ejecutar al cargar la página
+        initThemeSystem();
+
+        // Ejecutar cada vez que Astro cambia de página (View Transitions)
+        document.addEventListener('astro:after-swap', initThemeSystem);
+        
+        // Ejecutar cuando Astro carga la página completa (seguridad extra)
+        document.addEventListener('astro:page-load', initThemeSystem);
     })();
 </script>
