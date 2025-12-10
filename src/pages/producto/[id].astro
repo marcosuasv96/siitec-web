@@ -14,13 +14,37 @@ if (!producto) {
   return Astro.redirect('/catalogo');
 }
 
-// 2. PRECIO
-const precioLista = parseFloat(producto.precios.precio_lista || 0);
-const precioMXN = precioLista > 0 
-    ? (precioLista * tipoCambio).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) 
-    : "Cotizar";
+// 2. CONFIGURACIÓN FINANCIERA
+const IVA = 1.16;      // 16% Impuesto
+const MARGEN = 1.10;   // 10% Tu Ganancia sobre el costo
 
-// 3. IMÁGENES
+// 3. LÓGICA DE PRECIOS
+// Accedemos de forma segura al objeto de precios
+const preciosAPI = producto.precios || {};
+
+// Obtenemos los precios base en Dólares (USD)
+const pListaUSD = parseFloat(preciosAPI.precio_lista || producto.precio_lista || 0);
+const pEspecialUSD = parseFloat(preciosAPI.precio_especial || 0);
+const pDescuentoUSD = parseFloat(preciosAPI.precio_descuento || 0);
+
+// Función maestra: Convierte USD -> MXN y agrega el IVA
+const formatMXN = (usd) => (usd * tipoCambio * IVA).toLocaleString('es-MX', { 
+    style: 'currency', 
+    currency: 'MXN',
+    minimumFractionDigits: 2 
+});
+
+// A) Calcular TU costo base (el más barato que te ofrece Syscom)
+const costoBaseUSD = pDescuentoUSD > 0 ? pDescuentoUSD : (pEspecialUSD > 0 ? pEspecialUSD : pListaUSD);
+
+// B) Calcular TU precio de venta (Costo * 1.10)
+const precioVentaUSD = costoBaseUSD * MARGEN;
+
+// C) Generar textos finales
+const precioFinalMXN = costoBaseUSD > 0 ? formatMXN(precioVentaUSD) : "Cotizar";
+const precioListaMXN = formatMXN(pListaUSD); // Precio de referencia mercado (sin tu margen extra)
+
+// 4. IMÁGENES
 const imagenes = producto.imagenes && producto.imagenes.length > 0 
     ? producto.imagenes 
     : [{ imagen: producto.img_portada }];
@@ -83,22 +107,42 @@ const imagenes = producto.imagenes && producto.imagenes.length > 0
                         {producto.titulo}
                     </h1>
                     
-                    <div class="bg-white dark:bg-[#1E293B]/80 backdrop-blur-md rounded-2xl p-6 border border-gray-200 dark:border-white/10 mb-8 shadow-lg transition-colors">
-                        <p class="text-xs text-gray-500 dark:text-gray-400 mb-1 uppercase tracking-wide">Precio de Lista</p>
-                        <div class="flex items-end gap-2 mb-3">
-                            {precioLista > 0 ? (
-                                <>
-                                    <span class="text-4xl font-bold text-siitec-dark dark:text-siitec-accent transition-colors">{precioMXN}</span>
-                                    <span class="text-gray-500 dark:text-gray-400 mb-1 text-sm font-medium">MXN + IVA</span>
-                                </>
-                            ) : (
-                                <span class="text-3xl font-bold text-siitec-dark dark:text-white">Solicitar Cotización</span>
-                            )}
-                        </div>
+                    <div class="bg-white dark:bg-[#1E293B]/80 backdrop-blur-md rounded-2xl p-6 border border-gray-200 dark:border-white/10 mb-8 shadow-lg transition-colors relative overflow-hidden">
                         
-                        <div class="flex items-center gap-2 text-sm">
+                        <div class="absolute top-0 right-0 bg-gray-100 dark:bg-white/5 px-3 py-1 rounded-bl-xl border-l border-b border-gray-200 dark:border-white/10">
+                            <p class="text-[0.6rem] text-gray-500 dark:text-gray-400 font-mono">
+                                T.C. ${tipoCambio.toFixed(2)} MXN
+                            </p>
+                        </div>
+
+                        {costoBaseUSD > 0 ? (
+                            <div class="space-y-1 mt-2">
+                                
+                                {pListaUSD > precioVentaUSD && (
+                                    <p class="text-xs text-gray-400 dark:text-gray-500">
+                                        Precio de Lista: <span class="line-through">{precioListaMXN}</span>
+                                    </p>
+                                )}
+
+                                <div class="flex flex-col pt-2">
+                                    <div class="flex items-end gap-2">
+                                        <span class="text-4xl font-black text-gray-900 dark:text-white tracking-tight">
+                                            {precioFinalMXN}
+                                        </span>
+                                        <span class="text-siitec-dark dark:text-siitec-light font-bold text-lg mb-1">MXN</span>
+                                    </div>
+                                    <span class="text-gray-500 dark:text-gray-400 text-xs font-medium uppercase tracking-wide">
+                                        IVA (16%) Incluido
+                                    </span>
+                                </div>
+                            </div>
+                        ) : (
+                            <span class="text-3xl font-bold text-siitec-dark dark:text-white">Solicitar Cotización</span>
+                        )}
+                        
+                        <div class="flex items-center gap-2 text-sm mt-4 pt-4 border-t border-gray-100 dark:border-white/5">
                             <span class={`w-2 h-2 rounded-full ${producto.total_existencia > 0 ? 'bg-green-500 animate-pulse' : 'bg-yellow-500'}`}></span>
-                            <span class="text-gray-600 dark:text-gray-300">
+                            <span class="text-gray-600 dark:text-gray-300 font-medium">
                                 {producto.total_existencia > 0 ? `Disponible en almacén (${producto.total_existencia} pzas)` : 'Consultar disponibilidad'}
                             </span>
                         </div>
@@ -136,30 +180,27 @@ const imagenes = producto.imagenes && producto.imagenes.length > 0
         font-family: 'Inter', sans-serif;
         width: 100%;
     }
-    /* Estilos base (Light Mode por defecto) */
     .syscom-html p, .syscom-html li, .syscom-html span, .syscom-html div, .syscom-html td {
         background-color: transparent !important;
         font-size: 1rem !important;
         line-height: 1.7 !important;
-        color: inherit; /* Hereda el color del contenedor padre */
+        color: inherit;
     }
     
-    /* Forzar colores en modo oscuro */
     :global(.dark) .syscom-html p, 
     :global(.dark) .syscom-html li, 
     :global(.dark) .syscom-html span,
     :global(.dark) .syscom-html td {
-        color: #cbd5e1 !important; /* Gris claro en dark mode */
+        color: #cbd5e1 !important;
     }
 
-    /* Negritas */
     .syscom-html strong, .syscom-html b {
         font-weight: 700;
-        color: #111827; /* Negro en light mode */
+        color: #111827;
     }
     :global(.dark) .syscom-html strong, 
     :global(.dark) .syscom-html b {
-        color: #fff !important; /* Blanco en dark mode */
+        color: #fff !important;
     }
 
     .syscom-html ul {
@@ -177,17 +218,16 @@ const imagenes = producto.imagenes && producto.imagenes.length > 0
         opacity: 1;
     }
     :global(.dark) .syscom-html img {
-        opacity: 0.9; /* Un poco más suave en dark mode */
+        opacity: 0.9;
     }
 
-    /* Tablas */
     .syscom-html table {
         display: block;
         width: 100%;
         overflow-x: auto;
         border-collapse: collapse;
         margin: 1.5rem 0;
-        border: 1px solid #e5e7eb; /* Borde gris claro */
+        border: 1px solid #e5e7eb;
         border-radius: 8px;
     }
     :global(.dark) .syscom-html table {
@@ -206,12 +246,12 @@ const imagenes = producto.imagenes && producto.imagenes.length > 0
 
     .syscom-html th {
         background-color: #f9fafb;
-        color: #1B315E; /* Azul en light mode */
+        color: #1B315E;
         font-weight: bold;
         text-align: left;
     }
     :global(.dark) .syscom-html th {
         background-color: rgba(255,255,255,0.05);
-        color: #F9B233 !important; /* Amarillo en dark mode */
+        color: #F9B233 !important;
     }
 </style>
