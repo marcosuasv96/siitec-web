@@ -1,4 +1,4 @@
-import { getProductos } from '../lib/syscom';
+import { getProductos } from '../../lib/syscom';
 
 export async function GET() {
   // Llamamos a tu función
