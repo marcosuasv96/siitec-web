@@ -1,4 +1,4 @@
-import { getProductoById } from '../../../lib/syscom'; 
+import { getProductoById } from '../../../lib/syscom';
 // Nota: Ajusta los "../" dependiendo de qué tan profundo creaste el archivo.
 // Si está en src/pages/api/test-producto/[id].js, son 3 niveles hacia atrás.
 
