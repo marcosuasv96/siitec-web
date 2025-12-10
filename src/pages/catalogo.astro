@@ -6,13 +6,15 @@ import { getProductos, getTipoCambio } from '../lib/syscom';
 const page = Number(Astro.url.searchParams.get('page') || 1);
 const search = Astro.url.searchParams.get('q') || 'computo';
 
-// Ejecutar peticiones en paralelo (Productos y Dólar)
+// Ejecutar peticiones en paralelo
 const [dataProductos, tipoCambio] = await Promise.all([
     getProductos(search, page),
     getTipoCambio()
 ]);
 
-const { items: productos, paginas: totalPaginas } = dataProductos;
+// Syscom a veces devuelve 'productos' y a veces 'items', aseguramos que lea cualquiera
+const productos = dataProductos.items || dataProductos.productos || [];
+const totalPaginas = dataProductos.paginas || 1;
 
 const makeLink = (category) => `?q=${category}&page=1`;
 
@@ -60,12 +62,16 @@ const categorias = [
 
             {productos.length === 0 ? (
                 <div class="text-center py-20 bg-white dark:bg-white/5 rounded-xl border border-gray-200 dark:border-white/5 text-gray-500 dark:text-gray-400 shadow-sm">
-                    Sin resultados...
+                    Sin resultados o cargando...
                 </div>
             ) : (
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {productos.map((prod) => {
-                        const precioUSD = parseFloat(prod.precio_lista || 0);
+                        // --- CORRECCIÓN DE PRECIO AQUÍ ---
+                        // Accedemos a prod.precios.precio_lista
+                        const precioRaw = prod.precios?.precio_lista || prod.precio_lista || 0;
+                        const precioUSD = parseFloat(precioRaw);
+                        
                         const tienePrecio = precioUSD > 0;
                         const precioMXN = tienePrecio 
                             ? (precioUSD * tipoCambio).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) 

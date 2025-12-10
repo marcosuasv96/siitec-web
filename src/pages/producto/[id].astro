@@ -15,7 +15,7 @@ if (!producto) {
 }
 
 // 2. PRECIO
-const precioLista = parseFloat(producto.precio_lista || 0);
+const precioLista = parseFloat(producto.precios.precio_lista || 0);
 const precioMXN = precioLista > 0 
     ? (precioLista * tipoCambio).toLocaleString('es-MX', { style: 'currency', currency: 'MXN' }) 
     : "Cotizar";
