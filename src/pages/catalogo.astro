@@ -109,30 +109,82 @@ const MARGEN = 1.10;
                 
                 <div class="flex flex-col lg:flex-row gap-8">
                     
-                    {showSidebar && (
-                        <aside class="w-full lg:w-64 flex-shrink-0 space-y-8 animate-fade-in-left">
+      {showSidebar && (
+    <aside class="w-full lg:w-64 flex-shrink-0 space-y-8 animate-fade-in-left">
+        
+        <div class="bg-gray-50 dark:bg-[#1E293B] rounded-xl p-5 border border-gray-200 dark:border-white/5">
+            <h3 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+                <svg class="w-4 h-4 text-siitec-accent" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path></svg>
+                Marcas
+            </h3>
+            <div class="space-y-2 max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-siitec-light scrollbar-track-transparent pr-2">
+                {marcasDisponibles.map(marca => {
+                    const isActive = marca === marcaFilter;
+                    return (
+                        <a 
+                            href={createFilterLink('marca', isActive ? '' : marca)}
+                            class={`flex items-center justify-between text-sm px-3 py-2 rounded-lg transition-all duration-200 group
+                            ${isActive 
+                                ? 'bg-siitec-accent text-siitec-dark font-bold shadow-md hover:bg-red-500 hover:text-white' 
+                                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10 hover:pl-4'}`}
+                            title={isActive ? "Clic para quitar filtro" : "Filtrar por esta marca"}
+                        >
+                            <span class="truncate">{marca}</span>
                             
-                            <div class="bg-gray-50 dark:bg-[#1E293B] rounded-xl p-5 border border-gray-200 dark:border-white/5">
-                                <h3 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">Marcas</h3>
-                                <div class="space-y-2 max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-siitec-light scrollbar-track-transparent pr-2">
-                                    {marcasDisponibles.map(marca => (
-                                        <a href={createFilterLink('marca', marca)} class={`block text-sm px-2 py-1.5 rounded-lg transition-colors ${marcaFilter === marca ? 'bg-siitec-accent text-siitec-dark font-bold' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10 hover:text-siitec-dark dark:hover:text-white'}`}>{marca}</a>
-                                    ))}
-                                </div>
-                            </div>
+                            {/* ÍCONO DINÁMICO: Flecha si inactivo, X si activo */}
+                            {isActive ? (
+                                <svg class="w-4 h-4 flex-shrink-0 transition-transform group-hover:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path> </svg>
+                            ) : (
+                                <svg class="w-3 h-3 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path> </svg>
+                            )}
+                        </a>
+                    );
+                })}
+            </div>
+        </div>
 
-                            <div class="bg-gray-50 dark:bg-[#1E293B] rounded-xl p-5 border border-gray-200 dark:border-white/5">
-                                <h3 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">Categorías</h3>
-                                <div class="space-y-2">
-                                    {categoriasDisponibles.map(cat => (
-                                        <a href={createFilterLink('categoria', cat)} class={`block text-xs px-2 py-1.5 rounded-lg transition-colors truncate ${catFilter === cat ? 'bg-siitec-light text-white font-bold' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10 hover:text-siitec-dark dark:hover:text-white'}`}>{cat}</a>
-                                    ))}
-                                </div>
-                            </div>
+        <div class="bg-gray-50 dark:bg-[#1E293B] rounded-xl p-5 border border-gray-200 dark:border-white/5">
+            <h3 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">
+                <svg class="w-4 h-4 text-siitec-light" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
+                Categorías
+            </h3>
+            <div class="space-y-2">
+                {categoriasDisponibles.map(cat => {
+                    const isActive = cat === catFilter;
+                    return (
+                        <a 
+                            href={createFilterLink('categoria', isActive ? '' : cat)}
+                            class={`flex items-center justify-between text-xs px-3 py-2 rounded-lg transition-all duration-200 group
+                            ${isActive 
+                                ? 'bg-siitec-light text-white font-bold shadow-md hover:bg-red-500' 
+                                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10 hover:pl-4'}`}
+                            title={isActive ? "Clic para quitar filtro" : "Filtrar por esta categoría"}
+                        >
+                            <span class="truncate">{cat}</span>
                             
-                            <a href="/catalogo" class="block w-full text-center text-xs text-gray-400 hover:text-siitec-light border border-dashed border-gray-300 dark:border-white/10 py-2 rounded-lg transition-colors">Volver al inicio</a>
-                        </aside>
-                    )}
+                            {isActive ? (
+                                <svg class="w-3 h-3 flex-shrink-0 transition-transform group-hover:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            ) : (
+                                <svg class="w-3 h-3 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                                </svg>
+                            )}
+                        </a>
+                    );
+                })}
+            </div>
+        </div>
+        
+        <a href="/catalogo" class="block w-full text-center text-xs text-gray-400 hover:text-siitec-light border border-dashed border-gray-300 dark:border-white/10 py-2 rounded-lg transition-colors">
+            Limpiar Filtros
+        </a>
+
+    </aside>
+)}              
 
                     <div class="flex-1 transition-opacity duration-300">
                         {productos.length === 0 ? (

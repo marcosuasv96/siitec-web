@@ -64,36 +64,41 @@ export async function getProductos(search = '', page = 1, marca = '', categoria 
 
   const params = new URLSearchParams();
   params.append('pagina', page.toString());
-  // params.append('limit', '12'); // Opcional
 
-  // LÓGICA DE "MÁS VENDIDOS"
-  // Si no hay búsqueda ni filtros, pedimos 'seguridad' (o lo que quieras destacar)
-  // para llenar la página de inicio con productos populares.
-  if (!search && !marca && !categoria) {
-      params.append('busqueda', 'seguridad'); 
-      params.append('orden', 'relevancia'); // Asegura que salgan los populares
-  } else if (search) {
-      params.append('busqueda', search);
-  }
+  // LÓGICA DE BÚSQUEDA HÍBRIDA
+  // 1. Si no hay nada, buscamos 'seguridad' (destacados)
+  // 2. Si hay filtros, los sumamos al texto de búsqueda para evitar errores de ID
   
-  // Agregar filtros si existen
-  if (marca) params.append('marca', marca);
-  if (categoria) params.append('categoria', categoria);
+  let terminoFinal = search;
+
+  if (!search && !marca && !categoria) {
+      terminoFinal = 'seguridad'; // Default "Más vendidos"
+      params.append('orden', 'relevancia');
+  } else {
+      // Truco: Concatenamos los filtros al texto para que el buscador los encuentre
+      // Esto soluciona el error de "0 resultados" por no tener el ID de la marca
+      if (marca) terminoFinal += ` ${marca}`;
+      if (categoria) terminoFinal += ` ${categoria}`;
+  }
+
+  params.append('busqueda', terminoFinal.trim());
 
   try {
     const response = await fetch(`${BASE_URL}/productos?${params.toString()}`, {
       headers: { 'Authorization': `Bearer ${token}` }
     });
+    
     if (!response.ok) return emptyResult;
     
     const data = await response.json();
     return {
       items: data.productos || data.items || [],
       total: data.total_registros || 0,
-      paginas: data.paginas || 0,
+      paginas: data.paginas || 1,
       pagina_actual: parseInt(page)
     };
   } catch (error) {
+    console.error("Error buscando productos:", error);
     return emptyResult;
   }
 }
