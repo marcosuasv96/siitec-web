@@ -2,91 +2,288 @@
 import Layout from '../layouts/Layout.astro';
 import { getProductos, getTipoCambio } from '../lib/syscom';
 
-const page = Number(Astro.url.searchParams.get('page') || 1);
-const search = Astro.url.searchParams.get('q') || 'computo';
+// 1. OBTENER PARÁMETROS URL
+const url = Astro.url;
+const page = Number(url.searchParams.get('page') || 1);
 
+// Lógica de búsqueda
+const qParam = url.searchParams.get('q');
+const search = qParam || ''; 
+
+const marcaFilter = url.searchParams.get('marca') || '';
+const catFilter = url.searchParams.get('categoria') || '';
+
+const isHomeCatalog = !search && !marcaFilter && !catFilter;
+const showSidebar = !isHomeCatalog; 
+
+// 2. CONSULTAR API
 const [dataProductos, tipoCambio] = await Promise.all([
-    getProductos(search, page),
+    getProductos(search, page, marcaFilter, catFilter),
     getTipoCambio()
 ]);
 
 const productos = dataProductos.items || dataProductos.productos || [];
 const totalPaginas = dataProductos.paginas || 1;
-const makeLink = (category) => `?q=${category}&page=1`;
-const categorias = [
-    { label: 'Cómputo', query: 'laptop' },
-    { label: 'Videovigilancia', query: 'cctv' },
-    { label: 'Redes', query: 'access point' },
-    { label: 'Acceso', query: 'biometrico' },
-    { label: 'Audio', query: 'bocina' },
-];
+
+// 3. FACETAS
+const marcasDisponibles = showSidebar ? [...new Set(productos.map(p => p.marca))].slice(0, 10) : [];
+const categoriasDisponibles = showSidebar ? [...new Set(productos.flatMap(p => p.categorias.map(c => c.nombre)))].slice(0, 8) : [];
+
+// Helpers
+const createFilterLink = (key, value) => {
+    const newUrl = new URL(url);
+    if (value) newUrl.searchParams.set(key, value);
+    else newUrl.searchParams.delete(key);
+    newUrl.searchParams.set('page', '1');
+    if (qParam) newUrl.searchParams.set('q', qParam);
+    return newUrl.pathname + newUrl.search;
+};
 
 const IVA = 1.16;
-const MARGEN = 1.10; // 10% Ganancia
+const MARGEN = 1.10;
 ---
 
-<Layout title={`Catálogo: ${search} | Siitec Smart`}>
-    <div class="relative bg-white dark:bg-[#0B1221] pt-32 pb-12 overflow-hidden border-b border-gray-200 dark:border-siitec-light/10 transition-colors duration-300">
-        <div class="relative z-10 text-center px-4">
-            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-2">Inventario Digital</h1>
-            <p class="text-gray-500 dark:text-siitec-light text-sm">TC: ${tipoCambio.toFixed(2)} MXN</p>
+<Layout title={search ? `Resultados: ${search}` : 'Catálogo | Siitec Smart'}>
+    
+    <div class="relative bg-white dark:bg-[#0B1221] pt-32 pb-8 overflow-hidden border-b border-gray-200 dark:border-siitec-light/10 transition-colors duration-300">
+        <div class="absolute inset-0 bg-[url('/grid.svg')] opacity-5 dark:opacity-10 pointer-events-none"></div>
+        
+        <div class="relative z-10 text-center px-4 max-w-4xl mx-auto">
+            
+            <div id="catalog-header-title">
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-2">
+                    {isHomeCatalog ? (
+                        <span class="flex items-center justify-center gap-2">
+                            🔥 Productos <span class="text-transparent bg-clip-text bg-gradient-to-r from-siitec-dark to-siitec-accent">Más Vendidos</span>
+                        </span>
+                    ) : (
+                        <span>Búsqueda: <span class="text-siitec-accent">"{search}"</span></span>
+                    )}
+                </h1>
+                
+                <p class="text-sm text-gray-500 dark:text-gray-400 font-mono mb-6">
+                    Tipo de Cambio: <span class="font-bold text-siitec-dark dark:text-white">${tipoCambio.toFixed(2)} MXN</span>
+                </p>
+            </div>
+
+            <form id="search-form" onsubmit="event.preventDefault();" class="relative w-full group mb-4">
+                <div class="relative flex items-center bg-gray-50 dark:bg-[#151f32] border border-gray-200 dark:border-white/10 rounded-xl shadow-inner overflow-hidden focus-within:ring-2 focus-within:ring-siitec-light/50 transition-all">
+                    <div class="pl-4 text-gray-400">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    </div>
+                    
+                    <input 
+                        id="search-input"
+                        type="text" 
+                        name="q" 
+                        placeholder="Buscar producto, marca o modelo..." 
+                        class="w-full py-3 px-4 bg-transparent border-none focus:ring-0 text-gray-700 dark:text-white placeholder-gray-400 outline-none"
+                        value={qParam || ''} 
+                        autocomplete="off"
+                    />
+                    
+                    <div id="search-spinner" class="hidden pr-4">
+                        <svg class="animate-spin h-5 w-5 text-siitec-accent" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </form>
+            
+            {(marcaFilter || catFilter || qParam) && (
+                <div class="flex flex-wrap justify-center gap-2 text-sm animate-fade-in" id="active-filters">
+                    <span class="text-gray-500 dark:text-gray-400 py-1">Filtros activos:</span>
+                    {qParam && <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gray-200 dark:bg-white/10 text-gray-700 dark:text-white">Búsqueda: {qParam}</span>}
+                    {marcaFilter && <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-siitec-accent text-siitec-dark font-bold">{marcaFilter}</span>}
+                    {catFilter && <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-siitec-light text-white font-bold">{catFilter}</span>}
+                    <a href="/catalogo" class="text-xs text-gray-400 hover:text-siitec-light underline self-center ml-2">Borrar todo</a>
+                </div>
+            )}
         </div>
     </div>
 
-    <section class="bg-gray-50 dark:bg-[#0F172A] min-h-screen py-10 transition-colors duration-300">
-        <div class="max-w-7xl mx-auto px-4">
-            <div class="flex flex-wrap justify-center gap-3 mb-10">
-                {categorias.map(cat => (
-                    <a href={makeLink(cat.query)} class={`px-5 py-2 rounded-full text-xs font-bold uppercase tracking-wider border transition-all ${search === cat.query ? 'bg-siitec-accent text-siitec-dark' : 'bg-white dark:bg-[#0B1221] text-gray-600 dark:text-gray-400 border-gray-200 dark:border-white/10'}`}>{cat.label}</a>
-                ))}
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {productos.map((prod) => {
-                    const precios = prod.precios || {};
-                    const pListaUSD = parseFloat(precios.precio_lista || prod.precio_lista || 0);
-                    const pEspecialUSD = parseFloat(precios.precio_especial || 0);
-                    const pDescuentoUSD = parseFloat(precios.precio_descuento || 0);
-
-                    // Costo Base (El más barato que nos da Syscom)
-                    const costoBaseUSD = pDescuentoUSD > 0 ? pDescuentoUSD : (pEspecialUSD > 0 ? pEspecialUSD : pListaUSD);
+    <div id="catalog-dynamic-area">
+        <section class="bg-white dark:bg-[#0F172A] min-h-screen py-8 transition-colors duration-300">
+            <div class="max-w-7xl mx-auto px-4">
+                
+                <div class="flex flex-col lg:flex-row gap-8">
                     
-                    // Precio Venta (Costo + 10%)
-                    const precioVentaUSD = costoBaseUSD * MARGEN;
-
-                    const toMXN = (usd) => (usd * tipoCambio * IVA).toLocaleString('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 2 });
-                    
-                    const precioFinalMXN = costoBaseUSD > 0 ? toMXN(precioVentaUSD) : null;
-                    const precioListaMXN = toMXN(pListaUSD); // Precio lista sin margen extra para referencia
-
-                    return (
-                        <div class="group relative bg-white dark:bg-[#1E293B] rounded-xl overflow-hidden border border-gray-100 dark:border-white/5 hover:border-siitec-light/50 transition-all hover:-translate-y-1 hover:shadow-xl flex flex-col h-full">
-                            <a href={`/producto/${prod.producto_id}`} class="absolute inset-0 z-20"></a>
-                            <div class="h-56 bg-white p-4 relative flex items-center justify-center border-b border-gray-50 dark:border-white/5">
-                                <img src={prod.img_portada || '/logo.png'} alt={prod.titulo} class="max-h-full max-w-full object-contain group-hover:scale-105 transition" />
-                            </div>
-                            <div class="p-5 flex flex-col flex-grow relative z-10">
-                                <h3 class="text-gray-800 dark:text-gray-200 text-xs font-bold line-clamp-2 mb-3">{prod.titulo}</h3>
-                                <div class="mt-auto pt-3 border-t border-gray-100 dark:border-white/10">
-                                    {costoBaseUSD > 0 ? (
-                                        <div>
-                                            {pListaUSD > precioVentaUSD && <p class="text-[0.6rem] text-gray-400 line-through mb-0.5">{precioListaMXN}</p>}
-                                            <div class="flex items-baseline gap-1">
-                                                <span class="text-siitec-dark dark:text-siitec-accent font-bold text-lg">{precioFinalMXN}</span>
-                                                <span class="text-[0.6rem] text-gray-400 font-medium">MXN</span>
-                                            </div>
-                                            <p class="text-[0.6rem] text-gray-400 font-medium mt-0.5">IVA Incluido</p>
-                                        </div>
-                                    ) : (
-                                        <span class="text-siitec-dark dark:text-white font-bold text-xs bg-gray-100 dark:bg-siitec-light/20 px-3 py-1.5 rounded">Solicitar Cotización</span>
-                                    )}
+                    {showSidebar && (
+                        <aside class="w-full lg:w-64 flex-shrink-0 space-y-8 animate-fade-in-left">
+                            
+                            <div class="bg-gray-50 dark:bg-[#1E293B] rounded-xl p-5 border border-gray-200 dark:border-white/5">
+                                <h3 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">Marcas</h3>
+                                <div class="space-y-2 max-h-60 overflow-y-auto scrollbar-thin scrollbar-thumb-siitec-light scrollbar-track-transparent pr-2">
+                                    {marcasDisponibles.map(marca => (
+                                        <a href={createFilterLink('marca', marca)} class={`block text-sm px-2 py-1.5 rounded-lg transition-colors ${marcaFilter === marca ? 'bg-siitec-accent text-siitec-dark font-bold' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10 hover:text-siitec-dark dark:hover:text-white'}`}>{marca}</a>
+                                    ))}
                                 </div>
                             </div>
+
+                            <div class="bg-gray-50 dark:bg-[#1E293B] rounded-xl p-5 border border-gray-200 dark:border-white/5">
+                                <h3 class="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">Categorías</h3>
+                                <div class="space-y-2">
+                                    {categoriasDisponibles.map(cat => (
+                                        <a href={createFilterLink('categoria', cat)} class={`block text-xs px-2 py-1.5 rounded-lg transition-colors truncate ${catFilter === cat ? 'bg-siitec-light text-white font-bold' : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10 hover:text-siitec-dark dark:hover:text-white'}`}>{cat}</a>
+                                    ))}
+                                </div>
+                            </div>
+                            
+                            <a href="/catalogo" class="block w-full text-center text-xs text-gray-400 hover:text-siitec-light border border-dashed border-gray-300 dark:border-white/10 py-2 rounded-lg transition-colors">Volver al inicio</a>
+                        </aside>
+                    )}
+
+                    <div class="flex-1 transition-opacity duration-300">
+                        {productos.length === 0 ? (
+                            <div class="flex flex-col items-center justify-center h-64 bg-gray-50 dark:bg-[#1E293B] rounded-2xl border border-dashed border-gray-300 dark:border-white/10">
+                                <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                <p class="text-gray-500 dark:text-gray-400 font-medium">No encontramos productos.</p>
+                                <a href="/catalogo" class="mt-4 text-siitec-light text-sm font-bold hover:underline">Ver todo</a>
+                            </div>
+                        ) : (
+                            <div class={`grid grid-cols-1 sm:grid-cols-2 ${showSidebar ? 'lg:grid-cols-3' : 'lg:grid-cols-4'} gap-6`}>
+                                {productos.map((prod) => {
+                                    const precios = prod.precios || {};
+                                    const pListaUSD = parseFloat(precios.precio_lista || prod.precio_lista || 0);
+                                    const pEspecialUSD = parseFloat(precios.precio_especial || 0);
+                                    const pDescuentoUSD = parseFloat(precios.precio_descuento || 0);
+
+                                    const costoBaseUSD = pDescuentoUSD > 0 ? pDescuentoUSD : (pEspecialUSD > 0 ? pEspecialUSD : pListaUSD);
+                                    const precioVentaUSD = costoBaseUSD * MARGEN;
+
+                                    const toMXN = (usd) => (usd * tipoCambio * IVA).toLocaleString('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 2 });
+                                    
+                                    const precioFinalMXN = costoBaseUSD > 0 ? toMXN(precioVentaUSD) : null;
+                                    const precioListaMXN = toMXN(pListaUSD); 
+
+                                    return (
+                                        <div class="group relative bg-white dark:bg-[#1E293B] rounded-xl overflow-hidden border border-gray-100 dark:border-white/5 hover:border-siitec-light/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:hover:shadow-[0_0_30px_rgba(92,164,216,0.1)] flex flex-col h-full">
+                                            <a href={`/producto/${prod.producto_id}`} class="absolute inset-0 z-20"></a>
+                                            
+                                            {isHomeCatalog && (
+                                                <div class="absolute top-0 left-0 bg-red-500 text-white text-[0.6rem] font-bold px-2 py-1 rounded-br-lg z-10 shadow-sm">
+                                                    DESTACADO
+                                                </div>
+                                            )}
+
+                                            <div class="h-48 bg-white p-4 relative flex items-center justify-center border-b border-gray-50 dark:border-white/5">
+                                                <img src={prod.img_portada || '/logo.png'} alt={prod.titulo} class="max-h-full max-w-full object-contain group-hover:scale-105 transition duration-500" loading="lazy" />
+                                                <div class="absolute top-2 right-2 bg-gray-100 dark:bg-siitec-dark/90 backdrop-blur text-gray-600 dark:text-white text-[0.55rem] px-2 py-0.5 rounded border border-gray-200 dark:border-white/20 font-bold uppercase truncate max-w-[100px]">
+                                                    {prod.marca}
+                                                </div>
+                                            </div>
+                                            <div class="p-4 flex flex-col flex-grow relative z-10">
+                                                <h3 class="text-gray-800 dark:text-gray-200 text-xs font-bold leading-relaxed line-clamp-2 mb-3 group-hover:text-siitec-dark dark:group-hover:text-siitec-light transition-colors">{prod.titulo}</h3>
+                                                <div class="mt-auto pt-3 border-t border-gray-100 dark:border-white/10">
+                                                    {costoBaseUSD > 0 ? (
+                                                        <div>
+                                                            {pListaUSD > precioVentaUSD && <p class="text-[0.6rem] text-gray-400 line-through mb-0.5">{precioListaMXN}</p>}
+                                                            <div class="flex items-baseline gap-1">
+                                                                <span class="text-siitec-dark dark:text-siitec-accent font-bold text-lg">{precioFinalMXN}</span>
+                                                                <span class="text-[0.6rem] text-gray-400 font-medium">MXN</span>
+                                                            </div>
+                                                            <p class="text-[0.6rem] text-gray-400 font-medium mt-0.5">IVA Incluido</p>
+                                                        </div>
+                                                    ) : (
+                                                        <span class="text-siitec-dark dark:text-white font-bold text-xs bg-gray-100 dark:bg-siitec-light/20 px-3 py-1.5 rounded border border-gray-200 dark:border-siitec-light/30">Solicitar Cotización</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
+
+                        <div class="mt-12 flex justify-center items-center gap-4">
+                            {page > 1 ? (
+                                <a href={createFilterLink('page', (page - 1).toString())} class="px-4 py-2 rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-[#1E293B] text-gray-600 dark:text-gray-300 text-sm hover:border-siitec-light transition-colors">Anterior</a>
+                            ) : (
+                                <span class="px-4 py-2 rounded-lg border border-gray-100 dark:border-white/5 text-gray-300 dark:text-gray-700 text-sm cursor-not-allowed">Anterior</span>
+                            )}
+                            <span class="text-sm text-gray-500 dark:text-gray-400">Pág {page}</span>
+                            {page < totalPaginas ? (
+                                <a href={createFilterLink('page', (page + 1).toString())} class="px-4 py-2 rounded-lg border border-gray-200 dark:border-white/10 bg-white dark:bg-[#1E293B] text-gray-600 dark:text-gray-300 text-sm hover:border-siitec-light transition-colors">Siguiente</a>
+                            ) : (
+                                <span class="px-4 py-2 rounded-lg border border-gray-100 dark:border-white/5 text-gray-300 dark:text-gray-700 text-sm cursor-not-allowed">Siguiente</span>
+                            )}
                         </div>
-                    );
-                })}
+                    </div>
+                </div>
             </div>
-            
-            </div>
-    </section>
+        </section>
+    </div>
+
 </Layout>
+
+<script is:inline>
+    let searchTimeout;
+    const searchInput = document.getElementById('search-input');
+    const dynamicArea = document.getElementById('catalog-dynamic-area');
+    const titleContainer = document.getElementById('catalog-header-title');
+    const spinner = document.getElementById('search-spinner');
+
+    if (searchInput) {
+        searchInput.addEventListener('focus', () => searchInput.parentElement.classList.add('ring-2', 'ring-siitec-light/50'));
+        searchInput.addEventListener('blur', () => searchInput.parentElement.classList.remove('ring-2', 'ring-siitec-light/50'));
+
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            const finalQuery = query; 
+
+            if (spinner) spinner.classList.remove('hidden');
+            if (dynamicArea) dynamicArea.style.opacity = '0.5';
+
+            clearTimeout(searchTimeout);
+
+            searchTimeout = setTimeout(async () => {
+                try {
+                    const newUrl = new URL(window.location);
+                    
+                    if (query === '') {
+                        newUrl.searchParams.delete('q');
+                        newUrl.searchParams.delete('marca');
+                        newUrl.searchParams.delete('categoria');
+                    } else {
+                        newUrl.searchParams.set('q', query);
+                    }
+                    newUrl.searchParams.delete('page');
+                    
+                    window.history.pushState({}, '', newUrl);
+
+                    const res = await fetch(newUrl.href);
+                    const text = await res.text();
+                    
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(text, 'text/html');
+                    
+                    // 1. Reemplazamos la cuadrícula y filtros
+                    const newDynamic = doc.getElementById('catalog-dynamic-area').innerHTML;
+                    if (dynamicArea) dynamicArea.innerHTML = newDynamic;
+
+                    // 2. Reemplazamos el Título (Para que diga "Búsqueda: ..." o "Más Vendidos")
+                    const newTitle = doc.getElementById('catalog-header-title').innerHTML;
+                    if (titleContainer && newTitle) titleContainer.innerHTML = newTitle;
+
+                } catch (error) {
+                    console.error('Error en búsqueda:', error);
+                } finally {
+                    if (spinner) spinner.classList.add('hidden');
+                    if (dynamicArea) dynamicArea.style.opacity = '1';
+                    searchInput.focus();
+                }
+            }, 600);
+        });
+    }
+</script>
+
+<style>
+    @keyframes fade-in-left {
+        from { opacity: 0; transform: translateX(-20px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+    .animate-fade-in-left {
+        animation: fade-in-left 0.5s ease-out forwards;
+    }
+</style>
