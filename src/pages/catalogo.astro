@@ -2,21 +2,15 @@
 import Layout from '../layouts/Layout.astro';
 import { getProductos, getTipoCambio } from '../lib/syscom';
 
-// 1. OBTENER PARÁMETROS URL
 const url = Astro.url;
 const page = Number(url.searchParams.get('page') || 1);
-
-// Lógica de búsqueda
 const qParam = url.searchParams.get('q');
 const search = qParam || ''; 
-
 const marcaFilter = url.searchParams.get('marca') || '';
 const catFilter = url.searchParams.get('categoria') || '';
-
 const isHomeCatalog = !search && !marcaFilter && !catFilter;
 const showSidebar = !isHomeCatalog; 
 
-// 2. CONSULTAR API
 const [dataProductos, tipoCambio] = await Promise.all([
     getProductos(search, page, marcaFilter, catFilter),
     getTipoCambio()
@@ -25,11 +19,9 @@ const [dataProductos, tipoCambio] = await Promise.all([
 const productos = dataProductos.items || dataProductos.productos || [];
 const totalPaginas = dataProductos.paginas || 1;
 
-// 3. FACETAS
 const marcasDisponibles = showSidebar ? [...new Set(productos.map(p => p.marca))].slice(0, 10) : [];
 const categoriasDisponibles = showSidebar ? [...new Set(productos.flatMap(p => p.categorias.map(c => c.nombre)))].slice(0, 8) : [];
 
-// Helpers
 const createFilterLink = (key, value) => {
     const newUrl = new URL(url);
     if (value) newUrl.searchParams.set(key, value);
@@ -39,8 +31,7 @@ const createFilterLink = (key, value) => {
     return newUrl.pathname + newUrl.search;
 };
 
-const IVA = 1.16;
-const MARGEN = 1.36;
+const MARGEN = 1.44777; 
 ---
 
 <Layout title={search ? `Resultados: ${search}` : 'Catálogo | Siitec Smart'}>
@@ -130,8 +121,6 @@ const MARGEN = 1.36;
                             title={isActive ? "Clic para quitar filtro" : "Filtrar por esta marca"}
                         >
                             <span class="truncate">{marca}</span>
-                            
-                            {/* ÍCONO DINÁMICO: Flecha si inactivo, X si activo */}
                             {isActive ? (
                                 <svg class="w-4 h-4 flex-shrink-0 transition-transform group-hover:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path> </svg>
@@ -163,7 +152,6 @@ const MARGEN = 1.36;
                             title={isActive ? "Clic para quitar filtro" : "Filtrar por esta categoría"}
                         >
                             <span class="truncate">{cat}</span>
-                            
                             {isActive ? (
                                 <svg class="w-3 h-3 flex-shrink-0 transition-transform group-hover:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -184,7 +172,7 @@ const MARGEN = 1.36;
         </a>
 
     </aside>
-)}              
+)}               
 
                     <div class="flex-1 transition-opacity duration-300">
                         {productos.length === 0 ? (
@@ -202,19 +190,21 @@ const MARGEN = 1.36;
                                     const pDescuentoUSD = parseFloat(precios.precio_descuento || 0);
 
                                     const costoBaseUSD = pDescuentoUSD > 0 ? pDescuentoUSD : (pEspecialUSD > 0 ? pEspecialUSD : pListaUSD);
+                                    
                                     const precioVentaUSD = costoBaseUSD * MARGEN;
 
-                                    const toMXN = (usd) => (usd * tipoCambio * IVA).toLocaleString('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 2 });
+                                    const toMXN = (usd) => (usd * tipoCambio).toLocaleString('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 2 });
                                     
                                     const precioFinalMXN = costoBaseUSD > 0 ? toMXN(precioVentaUSD) : null;
                                     const precioListaMXN = toMXN(pListaUSD); 
 
                                     return (
                                         <div class="group relative bg-white dark:bg-[#1E293B] rounded-xl overflow-hidden border border-gray-100 dark:border-white/5 hover:border-siitec-light/50 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:hover:shadow-[0_0_30px_rgba(92,164,216,0.1)] flex flex-col h-full">
-                                            <a href={`/producto/${prod.producto_id}`} class="absolute inset-0 z-20"></a>
+                                            
+                                            <a href={`/producto/${prod.producto_id}`} class="absolute inset-0 z-10"></a>
                                             
                                             {isHomeCatalog && (
-                                                <div class="absolute top-0 left-0 bg-red-500 text-white text-[0.6rem] font-bold px-2 py-1 rounded-br-lg z-10 shadow-sm">
+                                                <div class="absolute top-0 left-0 bg-red-500 text-white text-[0.6rem] font-bold px-2 py-1 rounded-br-lg z-20 shadow-sm">
                                                     DESTACADO
                                                 </div>
                                             )}
@@ -225,7 +215,8 @@ const MARGEN = 1.36;
                                                     {prod.marca}
                                                 </div>
                                             </div>
-                                            <div class="p-4 flex flex-col flex-grow relative z-10">
+
+                                            <div class="p-4 flex flex-col flex-grow relative">
                                                 <h3 class="text-gray-800 dark:text-gray-200 text-xs font-bold leading-relaxed line-clamp-2 mb-3 group-hover:text-siitec-dark dark:group-hover:text-siitec-light transition-colors">{prod.titulo}</h3>
                                                 <div class="mt-auto pt-3 border-t border-gray-100 dark:border-white/10">
                                                     {costoBaseUSD > 0 ? (
@@ -235,11 +226,29 @@ const MARGEN = 1.36;
                                                                 <span class="text-siitec-dark dark:text-siitec-accent font-bold text-lg">{precioFinalMXN}</span>
                                                                 <span class="text-[0.6rem] text-gray-400 font-medium">MXN</span>
                                                             </div>
-                                                            <p class="text-[0.6rem] text-gray-400 font-medium mt-0.5">IVA Incluido</p>
+                                                            <p class="text-[0.6rem] text-siitec-accent font-bold uppercase">+ IVA</p>
                                                         </div>
                                                     ) : (
                                                         <span class="text-siitec-dark dark:text-white font-bold text-xs bg-gray-100 dark:bg-siitec-light/20 px-3 py-1.5 rounded border border-gray-200 dark:border-siitec-light/30">Solicitar Cotización</span>
                                                     )}
+                                                </div>
+
+                                                <div class="mt-4 flex gap-2 relative z-20">
+                                                    <a href={`/producto/${prod.producto_id}`} class="flex-1 bg-gray-100 dark:bg-white/5 hover:bg-gray-200 text-gray-700 dark:text-gray-300 text-xs font-bold py-2 rounded text-center transition">
+                                                        Ver detalles
+                                                    </a>
+                                                    
+                                                    <button 
+                                                        class="add-to-cart-btn bg-siitec-light/10 text-siitec-dark dark:text-siitec-light hover:bg-siitec-accent hover:text-siitec-dark border border-siitec-light/20 p-2 rounded transition-colors"
+                                                        title="Agregar a cotización"
+                                                        data-id={prod.producto_id}
+                                                        data-model={prod.modelo}
+                                                        data-title={prod.titulo}
+                                                        data-price={precioFinalMXN ? parseFloat(precioFinalMXN.replace(/[^0-9.]/g, '')) : 0}
+                                                        data-image={prod.img_portada || '/logo.png'}
+                                                    >
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                                                    </button>
                                                 </div>
                                             </div>
                                         </div>
@@ -282,8 +291,6 @@ const MARGEN = 1.36;
 
         searchInput.addEventListener('input', (e) => {
             const query = e.target.value.trim();
-            const finalQuery = query; 
-
             if (spinner) spinner.classList.remove('hidden');
             if (dynamicArea) dynamicArea.style.opacity = '0.5';
 
@@ -292,7 +299,6 @@ const MARGEN = 1.36;
             searchTimeout = setTimeout(async () => {
                 try {
                     const newUrl = new URL(window.location);
-                    
                     if (query === '') {
                         newUrl.searchParams.delete('q');
                         newUrl.searchParams.delete('marca');
@@ -301,25 +307,21 @@ const MARGEN = 1.36;
                         newUrl.searchParams.set('q', query);
                     }
                     newUrl.searchParams.delete('page');
-                    
                     window.history.pushState({}, '', newUrl);
 
                     const res = await fetch(newUrl.href);
                     const text = await res.text();
-                    
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(text, 'text/html');
                     
-                    // 1. Reemplazamos la cuadrícula y filtros
                     const newDynamic = doc.getElementById('catalog-dynamic-area').innerHTML;
                     if (dynamicArea) dynamicArea.innerHTML = newDynamic;
 
-                    // 2. Reemplazamos el Título (Para que diga "Búsqueda: ..." o "Más Vendidos")
                     const newTitle = doc.getElementById('catalog-header-title').innerHTML;
                     if (titleContainer && newTitle) titleContainer.innerHTML = newTitle;
 
                 } catch (error) {
-                    console.error('Error en búsqueda:', error);
+                    console.error('Error:', error);
                 } finally {
                     if (spinner) spinner.classList.add('hidden');
                     if (dynamicArea) dynamicArea.style.opacity = '1';
@@ -328,6 +330,26 @@ const MARGEN = 1.36;
             }, 600);
         });
     }
+
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('.add-to-cart-btn');
+        
+        if (btn) {
+            e.preventDefault(); 
+            e.stopPropagation(); 
+            
+            const product = {
+                id: btn.dataset.id,
+                model: btn.dataset.model,
+                title: btn.dataset.title,
+                price: parseFloat(btn.dataset.price) || 0,
+                image: btn.dataset.image
+            };
+
+            const event = new CustomEvent('add-to-cart', { detail: product });
+            document.dispatchEvent(event);
+        }
+    });
 </script>
 
 <style>

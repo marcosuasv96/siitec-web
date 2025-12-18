@@ -1,0 +1,218 @@
+---
+---
+
+<button 
+    id="cart-toggle" 
+    class="fixed bottom-6 right-6 z-50 bg-siitec-accent text-siitec-dark hover:bg-white hover:text-siitec-accent border-2 border-siitec-accent font-bold p-4 rounded-full shadow-2xl transition-all hover:scale-110 flex items-center justify-center group hidden"
+>
+    <div class="relative">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+        <span id="cart-count" class="absolute -top-3 -right-3 bg-red-600 text-white text-[0.65rem] font-bold w-5 h-5 flex items-center justify-center rounded-full opacity-0 transition-opacity">0</span>
+    </div>
+</button>
+
+<div id="cart-drawer" class="fixed inset-0 z-[60] pointer-events-none">
+    <div id="cart-overlay" class="absolute inset-0 bg-black/50 backdrop-blur-sm opacity-0 transition-opacity duration-300"></div>
+    
+    <aside id="cart-panel" class="absolute top-0 right-0 h-full w-full max-w-md bg-white dark:bg-[#1E293B] shadow-2xl transform translate-x-full transition-transform duration-300 pointer-events-auto flex flex-col">
+        
+        <div class="p-5 border-b border-gray-100 dark:border-white/10 flex justify-between items-center bg-gray-50 dark:bg-black/20">
+            <h2 class="text-xl font-bold text-gray-800 dark:text-white flex items-center gap-2">
+                🛒 Tu Cotización
+            </h2>
+            <button id="close-cart" class="text-gray-400 hover:text-red-500 transition">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+
+        <div id="cart-items" class="flex-1 overflow-y-auto p-5 space-y-4">
+            <div class="text-center text-gray-400 mt-10">
+                <p>Tu carrito está vacío.</p>
+            </div>
+        </div>
+
+        <div class="p-5 border-t border-gray-100 dark:border-white/10 bg-gray-50 dark:bg-black/20">
+            <div class="flex justify-between items-end mb-1">
+                <span class="text-gray-500 dark:text-gray-400 text-sm">Subtotal:</span>
+                <span id="cart-total" class="text-2xl font-bold text-siitec-dark dark:text-siitec-accent">$0.00 MXN</span>
+            </div>
+            <div class="text-right mb-4">
+                <span class="text-xs text-red-500 font-bold uppercase tracking-wide">+ IVA (16%)</span>
+            </div>
+            
+            <button id="btn-whatsapp-cart" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-green-500/30">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                Solicitar Cotización por WhatsApp
+            </button>
+            <button id="clear-cart" class="w-full mt-3 text-xs text-gray-400 hover:text-red-500 underline text-center">
+                Vaciar carrito
+            </button>
+        </div>
+    </aside>
+</div>
+
+<script is:inline>
+    const PHONE_NUMBER = "523316919113"; 
+    const CART_KEY = "siitec_cart_v1";
+
+    let cart = JSON.parse(localStorage.getItem(CART_KEY)) || [];
+
+    const cartToggle = document.getElementById('cart-toggle');
+    const cartDrawer = document.getElementById('cart-drawer');
+    const cartPanel = document.getElementById('cart-panel');
+    const cartOverlay = document.getElementById('cart-overlay');
+    const closeCart = document.getElementById('close-cart');
+    const cartItemsContainer = document.getElementById('cart-items');
+    const cartCount = document.getElementById('cart-count');
+    const cartTotal = document.getElementById('cart-total');
+    const btnWhatsapp = document.getElementById('btn-whatsapp-cart');
+    const btnClear = document.getElementById('clear-cart');
+
+    const saveCart = () => {
+        localStorage.setItem(CART_KEY, JSON.stringify(cart));
+        renderCart();
+    };
+
+    const formatMoney = (amount) => {
+        return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(amount);
+    };
+
+    const addToCart = (product) => {
+        const existing = cart.find(item => item.id === product.id);
+        if (existing) {
+            existing.qty += 1;
+        } else {
+            cart.push({ ...product, qty: 1 });
+        }
+        saveCart();
+        openCart(); 
+        
+        const badge = document.getElementById('cart-count');
+        badge.classList.add('scale-150');
+        setTimeout(() => badge.classList.remove('scale-150'), 200);
+    };
+
+    const removeFromCart = (id) => {
+        cart = cart.filter(item => item.id !== id);
+        saveCart();
+    };
+
+    const updateQty = (id, change) => {
+        const item = cart.find(i => i.id === id);
+        if (item) {
+            item.qty += change;
+            if (item.qty <= 0) removeFromCart(id);
+            else saveCart();
+        }
+    };
+
+    const renderCart = () => {
+        const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+        cartCount.innerText = totalItems;
+        cartCount.style.opacity = totalItems > 0 ? '1' : '0';
+
+        if (totalItems > 0) {
+            cartToggle.classList.remove('hidden');
+        } else {
+            cartToggle.classList.add('hidden');
+        }
+
+        const totalMoney = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+        cartTotal.innerText = formatMoney(totalMoney);
+
+        cartItemsContainer.innerHTML = '';
+        if (cart.length === 0) {
+            cartItemsContainer.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-gray-400">
+                <svg class="w-12 h-12 mb-2 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                <p>Tu carrito está vacío</p>
+            </div>`;
+            btnWhatsapp.disabled = true;
+            btnWhatsapp.classList.add('opacity-50', 'cursor-not-allowed');
+            return;
+        }
+
+        btnWhatsapp.disabled = false;
+        btnWhatsapp.classList.remove('opacity-50', 'cursor-not-allowed');
+
+        cart.forEach(item => {
+            const div = document.createElement('div');
+            div.className = "flex gap-3 bg-white dark:bg-white/5 p-3 rounded-lg border border-gray-100 dark:border-white/5 shadow-sm";
+            div.innerHTML = `
+                <img src="${item.image}" class="w-16 h-16 object-contain bg-white rounded-md p-1">
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs text-gray-400 font-mono truncate">${item.model}</p>
+                    <h4 class="text-sm font-bold text-gray-800 dark:text-gray-200 line-clamp-2 leading-tight mb-1">${item.title}</h4>
+                    <div class="flex items-center gap-1">
+                        <p class="text-siitec-dark dark:text-siitec-accent font-bold text-sm">${formatMoney(item.price)}</p>
+                        <span class="text-[0.6rem] text-red-500 font-bold">+ IVA</span>
+                    </div>
+                </div>
+                <div class="flex flex-col justify-between items-end">
+                    <button class="text-gray-400 hover:text-red-500" onclick="removeFromCart('${item.id}')">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    </button>
+                    <div class="flex items-center gap-2 bg-gray-100 dark:bg-black/30 rounded px-1">
+                        <button class="px-2 py-0.5 text-gray-600 dark:text-gray-300 hover:text-siitec-accent font-bold" onclick="updateQty('${item.id}', -1)">-</button>
+                        <span class="text-xs font-bold w-4 text-center dark:text-white">${item.qty}</span>
+                        <button class="px-2 py-0.5 text-gray-600 dark:text-gray-300 hover:text-siitec-accent font-bold" onclick="updateQty('${item.id}', 1)">+</button>
+                    </div>
+                </div>
+            `;
+            cartItemsContainer.appendChild(div);
+        });
+    };
+
+    const openCart = () => {
+        cartDrawer.classList.remove('pointer-events-none');
+        cartOverlay.classList.remove('opacity-0');
+        cartPanel.classList.remove('translate-x-full');
+    };
+
+    const closeCartUI = () => {
+        cartOverlay.classList.add('opacity-0');
+        cartPanel.classList.add('translate-x-full');
+        setTimeout(() => {
+            cartDrawer.classList.add('pointer-events-none');
+        }, 300);
+    };
+
+    cartToggle.addEventListener('click', openCart);
+    closeCart.addEventListener('click', closeCartUI);
+    cartOverlay.addEventListener('click', closeCartUI);
+    
+    btnClear.addEventListener('click', () => {
+        if(confirm('¿Vaciar carrito?')) {
+            cart = [];
+            saveCart();
+        }
+    });
+
+    document.addEventListener('add-to-cart', (e) => {
+        addToCart(e.detail);
+    });
+
+    btnWhatsapp.addEventListener('click', () => {
+        if (cart.length === 0) return;
+
+        let message = "*HOLA, ME GUSTARÍA COTIZAR LO SIGUIENTE:*\n\n";
+        
+        cart.forEach(item => {
+            message += `▪️ *${item.qty}x* ${item.model}\n   ${item.title}\n`;
+        });
+
+        const totalMoney = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+        message += `\n💰 *Subtotal:* ${formatMoney(totalMoney)}`;
+        message += `\n⚠️ *Nota:* A este total le falta agregar el 16% de IVA.`;
+        message += `\n\nPor favor, confirmarme existencias y precio final.`;
+
+        const url = `https://wa.me/${PHONE_NUMBER}?text=${encodeURIComponent(message)}`;
+        window.open(url, '_blank');
+    });
+
+    renderCart();
+
+    window.removeFromCart = removeFromCart;
+    window.updateQty = updateQty;
+</script>
