@@ -203,8 +203,8 @@
         });
 
         const totalMoney = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-        message += `\n💰 *Subtotal:* ${formatMoney(totalMoney)}`;
-        message += `\n⚠️ *Nota:* A este total le falta agregar el 16% de IVA.`;
+        message += `\n *Subtotal:* ${formatMoney(totalMoney)}`;
+        message += `\n *Nota:* A este total le falta agregar el 16% de IVA.`;
         message += `\n\nPor favor, confirmarme existencias y precio final.`;
 
         const url = `https://wa.me/${PHONE_NUMBER}?text=${encodeURIComponent(message)}`;
