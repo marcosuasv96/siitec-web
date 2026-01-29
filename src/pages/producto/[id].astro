@@ -13,7 +13,7 @@ if (!producto) {
   return Astro.redirect('/catalogo');
 }
 
-const MARGEN = 1.676; 
+const MARGEN = 1.6761; 
 
 const preciosAPI = producto.precios || {};
 const pListaUSD = parseFloat(preciosAPI.precio_lista || producto.precio_lista || 0);
